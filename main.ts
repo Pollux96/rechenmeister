@@ -1,6 +1,8 @@
 function InitHw () {
     I2C_LCD1602.LcdInit(39)
     pins.setPull(DigitalPin.P0, PinPullMode.PullUp)
+    pins.setPull(DigitalPin.P1, PinPullMode.PullUp)
+    pins.setPull(DigitalPin.P2, PinPullMode.PullUp)
 }
 function Start () {
     music._playDefaultBackground(music.builtInPlayableMelody(Melodies.PowerUp), music.PlaybackMode.UntilDone)
@@ -17,21 +19,19 @@ input.onButtonPressed(Button.A, function () {
     display(0, 2, "startet")
 })
 pins.onPulsed(DigitalPin.P1, PulseValue.Low, function () {
-    if (pins.pulseIn(DigitalPin.P1, PulseValue.High) > 50) {
-        taste = pins.i2cReadNumber(33, NumberFormat.UInt8LE, false)
-        if (taste < 255) {
-            serial.writeNumber(taste)
-            serial.writeLine("P1")
-        }
+    control.waitMicros(1000)
+    taste = 255 - pins.i2cReadNumber(33, NumberFormat.UInt8LE, false)
+    if (taste > 0) {
+        serial.writeLine("P1")
+        serial.writeNumber(taste)
     }
 })
 pins.onPulsed(DigitalPin.P2, PulseValue.Low, function () {
-    if (pins.pulseIn(DigitalPin.P2, PulseValue.High) > 50) {
-        taste = pins.i2cReadNumber(34, NumberFormat.UInt8LE, false)
-        if (taste < 255) {
-            serial.writeNumber(taste)
-            serial.writeLine("P2")
-        }
+    control.waitMicros(1000)
+    taste = 255 - pins.i2cReadNumber(34, NumberFormat.UInt8LE, false)
+    if (taste > 0) {
+        serial.writeLine("P2")
+        serial.writeNumber(taste)
     }
 })
 function display (x: number, y: number, Text: string) {
@@ -47,15 +47,16 @@ function display (x: number, y: number, Text: string) {
     }
     I2C_LCD1602.ShowString(Text, X, Y)
 }
-pins.onPulsed(DigitalPin.P0, PulseValue.Low, function () {
-    if (pins.pulseIn(DigitalPin.P0, PulseValue.High) > 50) {
-        if (taste == 0) {
-            taste = pins.i2cReadNumber(32, NumberFormat.UInt8LE, false)
-        }
-        if (taste < 255) {
-            serial.writeNumber(taste)
-            serial.writeLine("P0")
-        }
+control.onEvent(EventBusSource.MICROBIT_ID_IO_P0, EventBusValue.MICROBIT_PIN_EVT_FALL, function () {
+    control.waitMicros(1200)
+    serial.writeLine("Ereignis P0")
+    while (pins.digitalReadPin(DigitalPin.P0) == 0) {
+        taste = 255 - pins.i2cReadNumber(32, NumberFormat.UInt8LE, false)
+        serial.writeLine("Lese P0")
+    }
+    if (taste > 0) {
+        serial.writeLine("P0")
+        serial.writeNumber(taste)
     }
 })
 let X = 0
@@ -63,9 +64,3 @@ let Y = 0
 let taste = 0
 InitHw()
 Start()
-basic.forever(function () {
-    if (taste != 0) {
-        display(0, 0, convertToText(taste))
-        taste = 0
-    }
-})

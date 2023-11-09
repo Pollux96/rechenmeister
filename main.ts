@@ -18,6 +18,10 @@ input.onButtonPressed(Button.A, function () {
     display(0, 1, "rechenolympiade")
     display(0, 2, "startet")
 })
+function PruefeEingabe () {
+    AufgabeAusstehend = 0
+    display(0, 3, "" + convertToText(einerWert + zehnerWert) + "in" + convertToText(control.millis() - Startzeit) + "ms")
+}
 function bestimmeZahlvonP2 (portWert: number) {
     if (255 - portWert == 1) {
         einerWert = 1
@@ -39,6 +43,10 @@ function bestimmeZahlvonP2 (portWert: number) {
         fehler = 1
     }
 }
+input.onButtonPressed(Button.AB, function () {
+    TestGestartet = 1
+    Startzeit = control.millis()
+})
 function display (x: number, y: number, Text: string) {
     if (y == 2) {
         Y = 0
@@ -51,6 +59,12 @@ function display (x: number, y: number, Text: string) {
         X = x
     }
     I2C_LCD1602.ShowString(Text, X, Y)
+}
+function InitSw () {
+    Ergebnis = 0
+    einerWert = 0
+    zehnerWert = 0
+    TestGestartet = 0
 }
 function bestimmeZahlvonP1 (portWert: number) {
     if (255 - portWert == 1) {
@@ -89,14 +103,34 @@ function bestimmeZahlvonP0 (portWert: number) {
 let P2 = 0
 let P1 = 0
 let P0 = 0
+let Zahl1 = 0
+let Ergebnis = 0
 let X = 0
 let Y = 0
+let TestGestartet = 0
 let fehler = 0
+let Startzeit = 0
 let zehnerWert = 0
 let einerWert = 0
+let AufgabeAusstehend = 0
 InitHw()
+InitSw()
 basic.forever(function () {
-	
+    let Zahl2 = 0
+    if (TestGestartet == 1 && AufgabeAusstehend == 0) {
+        while (Zahl1 + Zahl2 > 100 || Zahl1 + Zahl2 == 0) {
+            Zahl1 = randint(0, 100)
+            Zahl1 = randint(0, 100)
+        }
+    }
+    AufgabeAusstehend = 1
+    display(0, 0, convertToText(Zahl1 + Zahl2))
+})
+basic.forever(function () {
+    if (einerWert != 0 || zehnerWert != 0) {
+        einerWert = 0
+        zehnerWert = 0
+    }
 })
 basic.forever(function () {
     if (pins.digitalReadPin(DigitalPin.P0) == 0) {

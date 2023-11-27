@@ -20,7 +20,7 @@ input.onButtonPressed(Button.A, function () {
 })
 function PruefeEingabe () {
     AufgabeAusstehend = 0
-    display(0, 3, "" + convertToText(einerWert + zehnerWert) + "in" + convertToText(control.millis() - Startzeit) + "ms")
+    display(0, 2, "Test")
 }
 function bestimmeZahlvonP2 (portWert: number) {
     if (255 - portWert == 1) {
@@ -45,7 +45,6 @@ function bestimmeZahlvonP2 (portWert: number) {
 }
 input.onButtonPressed(Button.AB, function () {
     TestGestartet = 1
-    Startzeit = control.millis()
 })
 function display (x: number, y: number, Text: string) {
     if (y == 2) {
@@ -65,6 +64,7 @@ function InitSw () {
     einerWert = 0
     zehnerWert = 0
     TestGestartet = 0
+    ZeigeAufgabe = 0
 }
 function bestimmeZahlvonP1 (portWert: number) {
     if (255 - portWert == 1) {
@@ -103,49 +103,67 @@ function bestimmeZahlvonP0 (portWert: number) {
 let P2 = 0
 let P1 = 0
 let P0 = 0
+let EingabeBeendet = 0
+let Endzeit = 0
+let Startzeit = 0
+let Zahl2 = 0
 let Zahl1 = 0
+let ZeigeAufgabe = 0
 let Ergebnis = 0
 let X = 0
 let Y = 0
 let TestGestartet = 0
 let fehler = 0
-let Startzeit = 0
 let zehnerWert = 0
 let einerWert = 0
 let AufgabeAusstehend = 0
 InitHw()
 InitSw()
+display(0, 1, "rechenolympiade")
 basic.forever(function () {
-    let Zahl2 = 0
     if (TestGestartet == 1 && AufgabeAusstehend == 0) {
         while (Zahl1 + Zahl2 > 100 || Zahl1 + Zahl2 == 0) {
             Zahl1 = randint(0, 100)
-            Zahl1 = randint(0, 100)
+            Zahl2 = randint(0, 100)
         }
+        AufgabeAusstehend = 1
+        ZeigeAufgabe = 1
+    } else if (ZeigeAufgabe == 1) {
+        display(0, 0, convertToText("" + Zahl1 + "+" + Zahl2 + "= ?"))
+        ZeigeAufgabe = 0
+        Startzeit = control.millis()
     }
-    AufgabeAusstehend = 1
-    display(0, 0, convertToText(Zahl1 + Zahl2))
 })
 basic.forever(function () {
-    if (einerWert != 0 || zehnerWert != 0) {
+    if (einerWert != 0 && zehnerWert != 0) {
+        Endzeit = control.millis() - Startzeit
+        EingabeBeendet = 1
         einerWert = 0
         zehnerWert = 0
     }
 })
 basic.forever(function () {
-    if (pins.digitalReadPin(DigitalPin.P0) == 0) {
-        control.waitMicros(40000)
-        P0 = pins.i2cReadNumber(32, NumberFormat.UInt8LE, false)
-        bestimmeZahlvonP0(P0)
-    }
-    if (pins.digitalReadPin(DigitalPin.P1) == 0) {
-        control.waitMicros(40000)
-        P1 = pins.i2cReadNumber(33, NumberFormat.UInt8LE, false)
-        bestimmeZahlvonP1(P1)
-    }
-    if (pins.digitalReadPin(DigitalPin.P2) == 0) {
-        control.waitMicros(40000)
-        P2 = pins.i2cReadNumber(34, NumberFormat.UInt8LE, false)
-        bestimmeZahlvonP2(P2)
+    if (EingabeBeendet == 0) {
+        if (pins.digitalReadPin(DigitalPin.P0) == 0) {
+            control.waitMicros(40000)
+            P0 = pins.i2cReadNumber(32, NumberFormat.UInt8LE, false)
+            bestimmeZahlvonP0(P0)
+        }
+        if (pins.digitalReadPin(DigitalPin.P1) == 0) {
+            control.waitMicros(40000)
+            P1 = pins.i2cReadNumber(33, NumberFormat.UInt8LE, false)
+            bestimmeZahlvonP1(P1)
+        }
+        if (pins.digitalReadPin(DigitalPin.P2) == 0) {
+            control.waitMicros(40000)
+            P2 = pins.i2cReadNumber(34, NumberFormat.UInt8LE, false)
+            bestimmeZahlvonP2(P2)
+        }
+    } else {
+        if (EingabeBeendet == 1) {
+            basic.pause(500)
+            EingabeBeendet = 0
+            PruefeEingabe()
+        }
     }
 })

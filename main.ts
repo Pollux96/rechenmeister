@@ -14,9 +14,12 @@ function Start () {
 }
 input.onButtonPressed(Button.A, function () {
     I2C_LCD1602.clear()
-    display(0, 0, "die")
-    display(0, 1, "rechenolympiade")
-    display(0, 2, "startet")
+    display(0, 0, "SCHWARZE KNOEPFE")
+    basic.pause(2000)
+    I2C_LCD1602.clear()
+    display(0, 0, "1 Plus & Minus")
+    display(0, 1, "2 Plus")
+    display(0, 2, "3 Minus")
 })
 function PruefeEingabe () {
     AufgabeAusstehend = 0
@@ -65,6 +68,7 @@ function InitSw () {
     zehnerWert = 0
     TestGestartet = 0
     ZeigeAufgabe = 0
+    EingabeBeendet = 0
 }
 function bestimmeZahlvonP1 (portWert: number) {
     if (255 - portWert == 1) {
@@ -100,14 +104,14 @@ function bestimmeZahlvonP0 (portWert: number) {
         fehler = 1
     }
 }
+let Endzeit = 0
 let P2 = 0
 let P1 = 0
 let P0 = 0
-let EingabeBeendet = 0
-let Endzeit = 0
 let Startzeit = 0
 let Zahl2 = 0
 let Zahl1 = 0
+let EingabeBeendet = 0
 let ZeigeAufgabe = 0
 let Ergebnis = 0
 let X = 0
@@ -119,7 +123,9 @@ let einerWert = 0
 let AufgabeAusstehend = 0
 InitHw()
 InitSw()
-display(0, 1, "rechenolympiade")
+display(0, 0, "Hallo")
+display(0, 1, "Rechenkuenstler.")
+display(0, 2, "Ich starte.")
 basic.forever(function () {
     if (TestGestartet == 1 && AufgabeAusstehend == 0) {
         while (Zahl1 + Zahl2 > 100 || Zahl1 + Zahl2 == 0) {
@@ -129,17 +135,10 @@ basic.forever(function () {
         AufgabeAusstehend = 1
         ZeigeAufgabe = 1
     } else if (ZeigeAufgabe == 1) {
-        display(0, 0, convertToText("" + Zahl1 + "+" + Zahl2 + "= ?"))
+        let Operation = 0
+        display(0, 0, convertToText("" + Zahl1 + Operation + Zahl2 + "= ?"))
         ZeigeAufgabe = 0
         Startzeit = control.millis()
-    }
-})
-basic.forever(function () {
-    if (einerWert != 0 && zehnerWert != 0) {
-        Endzeit = control.millis() - Startzeit
-        EingabeBeendet = 1
-        einerWert = 0
-        zehnerWert = 0
     }
 })
 basic.forever(function () {
@@ -164,6 +163,23 @@ basic.forever(function () {
             basic.pause(500)
             EingabeBeendet = 0
             PruefeEingabe()
+        }
+    }
+})
+basic.forever(function () {
+    if (Ergebnis >= 10) {
+        if (einerWert != 0 && zehnerWert != 0) {
+            Endzeit = control.millis() - Startzeit
+            EingabeBeendet = 1
+            einerWert = 0
+            zehnerWert = 0
+        }
+    } else {
+        if (einerWert != 0) {
+            Endzeit = control.millis() - Startzeit
+            EingabeBeendet = 1
+            einerWert = 0
+            zehnerWert = 0
         }
     }
 })

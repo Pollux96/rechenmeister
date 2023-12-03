@@ -4,9 +4,23 @@ function InitHw () {
     pins.setPull(DigitalPin.P1, PinPullMode.PullUp)
     pins.setPull(DigitalPin.P2, PinPullMode.PullUp)
 }
-input.onButtonPressed(Button.A, function () {
-    Menu()
-})
+function leseTasten () {
+    if (pins.digitalReadPin(DigitalPin.P0) == 0) {
+        control.waitMicros(40000)
+        P0 = pins.i2cReadNumber(32, NumberFormat.UInt8LE, false)
+        bestimmeZahlvonP0(P0)
+    }
+    if (pins.digitalReadPin(DigitalPin.P1) == 0) {
+        control.waitMicros(40000)
+        P1 = pins.i2cReadNumber(33, NumberFormat.UInt8LE, false)
+        bestimmeZahlvonP1(P1)
+    }
+    if (pins.digitalReadPin(DigitalPin.P2) == 0) {
+        control.waitMicros(40000)
+        P2 = pins.i2cReadNumber(34, NumberFormat.UInt8LE, false)
+        bestimmeZahlvonP2(P2)
+    }
+}
 function PruefeEingabe () {
     display(0, 2, convertToText(einerWert))
     AufgabeAusstehend = 0
@@ -56,6 +70,7 @@ function InitSw () {
     ZeigeAufgabe = 0
     EingabeBeendet = 0
     Zustand = 0
+    operationText = 0
 }
 function bestimmeZahlvonP1 (portWert2: number) {
     if (255 - portWert2 == 1) {
@@ -71,15 +86,25 @@ function bestimmeZahlvonP1 (portWert2: number) {
     }
 }
 function Menu () {
-    while (EingabeBeendet == 0) {
-        I2C_LCD1602.clear()
-        display(0, 0, "SCHWARZE KNOEPFE")
-        basic.pause(2000)
-        I2C_LCD1602.clear()
-        display(0, 0, "1 Plus & Minus")
-        display(0, 1, "2 Plus")
-        display(0, 2, "3 Minus")
+    I2C_LCD1602.clear()
+    display(0, 0, "SCHWARZE KNOEPFE")
+    basic.pause(2000)
+    I2C_LCD1602.clear()
+    display(0, 0, "1 Plus & Minus")
+    display(0, 1, "2 Plus")
+    display(0, 2, "3 Minus")
+    while (einerWert == 0) {
+        leseTasten()
     }
+    RechenModus = einerWert
+    if (RechenModus == 2) {
+        Operation = 1
+    } else if (RechenModus == 3) {
+        Operation = 2
+    }
+    I2C_LCD1602.clear()
+    display(4, 1, "Start des Test mit 'A' Taste")
+    Zustand = 2
 }
 function bestimmeZahlvonP0 (portWert3: number) {
     if (255 - portWert3 == 1) {
@@ -102,14 +127,42 @@ function bestimmeZahlvonP0 (portWert3: number) {
         fehler = 1
     }
 }
+function TestAusfuehrung () {
+    if (TestGestartet == 1 && AufgabeAusstehend == 0) {
+        if (RechenModus == 1) {
+            Operation = randint(1, 2)
+        }
+        if (Operation == 1) {
+            operationText = "+"
+            while (Zahl1 + Zahl2 > 100 || Zahl1 + Zahl2 == 0) {
+                Zahl1 = randint(0, 100)
+                Zahl2 = randint(0, 100)
+            }
+            Ergebnis = Zahl1 + Zahl2
+        } else {
+            operationText = "-"
+            while (Zahl1 - Zahl2 < 0 || Zahl1 - Zahl2 == 0) {
+                Zahl1 = randint(0, 100)
+                Zahl2 = randint(0, 100)
+            }
+            Ergebnis = Zahl1 - Zahl2
+        }
+        AufgabeAusstehend = 1
+        ZeigeAufgabe = 1
+    } else if (ZeigeAufgabe == 1) {
+        I2C_LCD1602.clear()
+        display(5, 1, convertToText("" + Zahl1 + " " + ("" + operationText) + " " + ("" + Zahl2) + " = ?"))
+        ZeigeAufgabe = 0
+        Startzeit = control.millis()
+    }
+}
 let Endzeit = 0
-let P2 = 0
-let P1 = 0
-let P0 = 0
 let Startzeit = 0
-let Operation = 0
 let Zahl2 = 0
 let Zahl1 = 0
+let Operation = 0
+let RechenModus = 0
+let operationText = ""
 let EingabeBeendet = 0
 let ZeigeAufgabe = 0
 let Ergebnis = 0
@@ -120,6 +173,9 @@ let fehler = 0
 let zehnerWert = 0
 let AufgabeAusstehend = 0
 let einerWert = 0
+let P2 = 0
+let P1 = 0
+let P0 = 0
 let Zustand = 0
 InitHw()
 InitSw()
@@ -128,44 +184,6 @@ display(0, 1, "Rechenkuenstler.")
 display(0, 2, "Ich starte.")
 basic.pause(1000)
 Zustand = 1
-basic.forever(function () {
-    if (TestGestartet == 1 && AufgabeAusstehend == 0) {
-        while (Zahl1 + Zahl2 > 100 || Zahl1 + Zahl2 == 0) {
-            Zahl1 = randint(0, 100)
-            Zahl2 = randint(0, 100)
-        }
-        AufgabeAusstehend = 1
-        ZeigeAufgabe = 1
-    } else if (ZeigeAufgabe == 1) {
-        Operation = 0
-        display(0, 0, convertToText("" + Zahl1 + " " + ("" + Operation) + " " + ("" + Zahl2) + " = ?"))
-        ZeigeAufgabe = 0
-        Startzeit = control.millis()
-    }
-})
-basic.forever(function () {
-    if (EingabeBeendet == 0) {
-        if (pins.digitalReadPin(DigitalPin.P0) == 0) {
-            control.waitMicros(40000)
-            P0 = pins.i2cReadNumber(32, NumberFormat.UInt8LE, false)
-            bestimmeZahlvonP0(P0)
-        }
-        if (pins.digitalReadPin(DigitalPin.P1) == 0) {
-            control.waitMicros(40000)
-            P1 = pins.i2cReadNumber(33, NumberFormat.UInt8LE, false)
-            bestimmeZahlvonP1(P1)
-        }
-        if (pins.digitalReadPin(DigitalPin.P2) == 0) {
-            control.waitMicros(40000)
-            P2 = pins.i2cReadNumber(34, NumberFormat.UInt8LE, false)
-            bestimmeZahlvonP2(P2)
-        }
-    } else {
-        basic.pause(500)
-        EingabeBeendet = 0
-        PruefeEingabe()
-    }
-})
 basic.forever(function () {
     if (AufgabeAusstehend == 1) {
         if (Ergebnis < 10) {
@@ -183,7 +201,7 @@ basic.forever(function () {
     if (Zustand == 1) {
         Menu()
     } else if (Zustand == 2) {
-    	
+        TestAusfuehrung()
     } else if (Zustand == 3) {
     	
     } else if (Zustand == 4) {

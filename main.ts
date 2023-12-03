@@ -5,21 +5,15 @@ function InitHw () {
     pins.setPull(DigitalPin.P2, PinPullMode.PullUp)
 }
 function Menü () {
-    I2C_LCD1602.clear()
-    display(0, 0, "SCHWARZE KNOEPFE")
-    basic.pause(2000)
-    I2C_LCD1602.clear()
-    display(0, 0, "1 Plus & Minus")
-    display(0, 1, "2 Plus")
-    display(0, 2, "3 Minus")
-}
-function Start () {
-    music._playDefaultBackground(music.builtInPlayableMelody(Melodies.PowerUp), music.PlaybackMode.UntilDone)
-    display(0, 0, "Hallo.")
-    display(0, 1, "Rechenkuenstler.")
-    display(0, 2, "ich starte.")
-    I2C_LCD1602.clear()
-    display(2, 2, "Drueke a.")
+    while (EingabeBeendet == 0) {
+        I2C_LCD1602.clear()
+        display(0, 0, "SCHWARZE KNOEPFE")
+        basic.pause(2000)
+        I2C_LCD1602.clear()
+        display(0, 0, "1 Plus & Minus")
+        display(0, 1, "2 Plus")
+        display(0, 2, "3 Minus")
+    }
 }
 input.onButtonPressed(Button.A, function () {
     Menü()
@@ -72,6 +66,7 @@ function InitSw () {
     TestGestartet = 0
     ZeigeAufgabe = 0
     EingabeBeendet = 0
+    Zustand = 0
 }
 function bestimmeZahlvonP1 (portWert2: number) {
     if (255 - portWert2 == 1) {
@@ -115,7 +110,6 @@ let Startzeit = 0
 let Operation = 0
 let Zahl2 = 0
 let Zahl1 = 0
-let EingabeBeendet = 0
 let ZeigeAufgabe = 0
 let Ergebnis = 0
 let X = 0
@@ -125,13 +119,15 @@ let fehler = 0
 let zehnerWert = 0
 let AufgabeAusstehend = 0
 let einerWert = 0
+let EingabeBeendet = 0
+let Zustand = 0
 InitHw()
 InitSw()
 display(0, 0, "Hallo")
 display(0, 1, "Rechenkuenstler.")
 display(0, 2, "Ich starte.")
 basic.pause(1000)
-Menü()
+Zustand = 1
 basic.forever(function () {
     if (TestGestartet == 1 && AufgabeAusstehend == 0) {
         while (Zahl1 + Zahl2 > 100 || Zahl1 + Zahl2 == 0) {
@@ -172,7 +168,7 @@ basic.forever(function () {
 })
 basic.forever(function () {
     if (AufgabeAusstehend == 1) {
-        if (Ergebnis >= 10) {
+        if (Ergebnis < 10) {
             if (einerWert != 0 && zehnerWert != 0) {
                 Endzeit = control.millis() - Startzeit
                 EingabeBeendet = 1
@@ -181,5 +177,18 @@ basic.forever(function () {
             Endzeit = control.millis() - Startzeit
             EingabeBeendet = 1
         }
+    }
+})
+basic.forever(function () {
+    if (Zustand == 1) {
+        Menü()
+    } else if (Zustand == 2) {
+    	
+    } else if (Zustand == 3) {
+    	
+    } else if (Zustand == 4) {
+    	
+    } else if (Zustand == 5) {
+    	
     }
 })

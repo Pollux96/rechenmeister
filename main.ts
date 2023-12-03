@@ -4,6 +4,15 @@ function InitHw () {
     pins.setPull(DigitalPin.P1, PinPullMode.PullUp)
     pins.setPull(DigitalPin.P2, PinPullMode.PullUp)
 }
+function Menü () {
+    I2C_LCD1602.clear()
+    display(0, 0, "SCHWARZE KNOEPFE")
+    basic.pause(2000)
+    I2C_LCD1602.clear()
+    display(0, 0, "1 Plus & Minus")
+    display(0, 1, "2 Plus")
+    display(0, 2, "3 Minus")
+}
 function Start () {
     music._playDefaultBackground(music.builtInPlayableMelody(Melodies.PowerUp), music.PlaybackMode.UntilDone)
     display(0, 0, "Hallo.")
@@ -13,17 +22,11 @@ function Start () {
     display(2, 2, "Drueke a.")
 }
 input.onButtonPressed(Button.A, function () {
-    I2C_LCD1602.clear()
-    display(0, 0, "SCHWARZE KNOEPFE")
-    basic.pause(2000)
-    I2C_LCD1602.clear()
-    display(0, 0, "1 Plus & Minus")
-    display(0, 1, "2 Plus")
-    display(0, 2, "3 Minus")
+    Menü()
 })
 function PruefeEingabe () {
+    display(0, 2, convertToText(einerWert))
     AufgabeAusstehend = 0
-    display(0, 2, "Test")
 }
 function bestimmeZahlvonP2 (portWert: number) {
     if (255 - portWert == 1) {
@@ -70,35 +73,35 @@ function InitSw () {
     ZeigeAufgabe = 0
     EingabeBeendet = 0
 }
-function bestimmeZahlvonP1 (portWert: number) {
-    if (255 - portWert == 1) {
+function bestimmeZahlvonP1 (portWert2: number) {
+    if (255 - portWert2 == 1) {
         zehnerWert = 40
-    } else if (255 - portWert == 2) {
+    } else if (255 - portWert2 == 2) {
         zehnerWert = 50
-    } else if (255 - portWert == 4) {
+    } else if (255 - portWert2 == 4) {
         zehnerWert = 90
-    } else if (255 - portWert == 8) {
+    } else if (255 - portWert2 == 8) {
         zehnerWert = 100
     } else {
         fehler = 1
     }
 }
-function bestimmeZahlvonP0 (portWert: number) {
-    if (255 - portWert == 1) {
+function bestimmeZahlvonP0 (portWert3: number) {
+    if (255 - portWert3 == 1) {
         einerWert = 5
-    } else if (255 - portWert == 2) {
+    } else if (255 - portWert3 == 2) {
         einerWert = 6
-    } else if (255 - portWert == 4) {
+    } else if (255 - portWert3 == 4) {
         einerWert = 7
-    } else if (255 - portWert == 8) {
+    } else if (255 - portWert3 == 8) {
         einerWert = 8
-    } else if (255 - portWert == 16) {
+    } else if (255 - portWert3 == 16) {
         einerWert = 9
-    } else if (255 - portWert == 32) {
+    } else if (255 - portWert3 == 32) {
         zehnerWert = 60
-    } else if (255 - portWert == 64) {
+    } else if (255 - portWert3 == 64) {
         zehnerWert = 70
-    } else if (255 - portWert == 128) {
+    } else if (255 - portWert3 == 128) {
         zehnerWert = 80
     } else {
         fehler = 1
@@ -109,6 +112,7 @@ let P2 = 0
 let P1 = 0
 let P0 = 0
 let Startzeit = 0
+let Operation = 0
 let Zahl2 = 0
 let Zahl1 = 0
 let EingabeBeendet = 0
@@ -119,13 +123,15 @@ let Y = 0
 let TestGestartet = 0
 let fehler = 0
 let zehnerWert = 0
-let einerWert = 0
 let AufgabeAusstehend = 0
+let einerWert = 0
 InitHw()
 InitSw()
 display(0, 0, "Hallo")
 display(0, 1, "Rechenkuenstler.")
 display(0, 2, "Ich starte.")
+basic.pause(1000)
+Menü()
 basic.forever(function () {
     if (TestGestartet == 1 && AufgabeAusstehend == 0) {
         while (Zahl1 + Zahl2 > 100 || Zahl1 + Zahl2 == 0) {
@@ -135,8 +141,8 @@ basic.forever(function () {
         AufgabeAusstehend = 1
         ZeigeAufgabe = 1
     } else if (ZeigeAufgabe == 1) {
-        let Operation = 0
-        display(0, 0, convertToText("" + Zahl1 + Operation + Zahl2 + "= ?"))
+        Operation = 0
+        display(0, 0, convertToText("" + Zahl1 + " " + ("" + Operation) + " " + ("" + Zahl2) + " = ?"))
         ZeigeAufgabe = 0
         Startzeit = control.millis()
     }
@@ -159,27 +165,21 @@ basic.forever(function () {
             bestimmeZahlvonP2(P2)
         }
     } else {
-        if (EingabeBeendet == 1) {
-            basic.pause(500)
-            EingabeBeendet = 0
-            PruefeEingabe()
-        }
+        basic.pause(500)
+        EingabeBeendet = 0
+        PruefeEingabe()
     }
 })
 basic.forever(function () {
-    if (Ergebnis >= 10) {
-        if (einerWert != 0 && zehnerWert != 0) {
+    if (AufgabeAusstehend == 1) {
+        if (Ergebnis >= 10) {
+            if (einerWert != 0 && zehnerWert != 0) {
+                Endzeit = control.millis() - Startzeit
+                EingabeBeendet = 1
+            }
+        } else if (einerWert != 0) {
             Endzeit = control.millis() - Startzeit
             EingabeBeendet = 1
-            einerWert = 0
-            zehnerWert = 0
-        }
-    } else {
-        if (einerWert != 0) {
-            Endzeit = control.millis() - Startzeit
-            EingabeBeendet = 1
-            einerWert = 0
-            zehnerWert = 0
         }
     }
 })

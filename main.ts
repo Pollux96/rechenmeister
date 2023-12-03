@@ -4,19 +4,8 @@ function InitHw () {
     pins.setPull(DigitalPin.P1, PinPullMode.PullUp)
     pins.setPull(DigitalPin.P2, PinPullMode.PullUp)
 }
-function Menü () {
-    while (EingabeBeendet == 0) {
-        I2C_LCD1602.clear()
-        display(0, 0, "SCHWARZE KNOEPFE")
-        basic.pause(2000)
-        I2C_LCD1602.clear()
-        display(0, 0, "1 Plus & Minus")
-        display(0, 1, "2 Plus")
-        display(0, 2, "3 Minus")
-    }
-}
 input.onButtonPressed(Button.A, function () {
-    Menü()
+    Menu()
 })
 function PruefeEingabe () {
     display(0, 2, convertToText(einerWert))
@@ -81,6 +70,17 @@ function bestimmeZahlvonP1 (portWert2: number) {
         fehler = 1
     }
 }
+function Menu () {
+    while (EingabeBeendet == 0) {
+        I2C_LCD1602.clear()
+        display(0, 0, "SCHWARZE KNOEPFE")
+        basic.pause(2000)
+        I2C_LCD1602.clear()
+        display(0, 0, "1 Plus & Minus")
+        display(0, 1, "2 Plus")
+        display(0, 2, "3 Minus")
+    }
+}
 function bestimmeZahlvonP0 (portWert3: number) {
     if (255 - portWert3 == 1) {
         einerWert = 5
@@ -110,6 +110,7 @@ let Startzeit = 0
 let Operation = 0
 let Zahl2 = 0
 let Zahl1 = 0
+let EingabeBeendet = 0
 let ZeigeAufgabe = 0
 let Ergebnis = 0
 let X = 0
@@ -119,7 +120,6 @@ let fehler = 0
 let zehnerWert = 0
 let AufgabeAusstehend = 0
 let einerWert = 0
-let EingabeBeendet = 0
 let Zustand = 0
 InitHw()
 InitSw()
@@ -181,7 +181,7 @@ basic.forever(function () {
 })
 basic.forever(function () {
     if (Zustand == 1) {
-        Menü()
+        Menu()
     } else if (Zustand == 2) {
     	
     } else if (Zustand == 3) {

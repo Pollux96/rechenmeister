@@ -22,8 +22,28 @@ function leseTasten () {
     }
 }
 function PruefeEingabe () {
-    display(0, 2, convertToText(einerWert))
+    if (AufgabeAusstehend == 1) {
+        if (Ergebnis > 10) {
+            if (einerWert != 0 && zehnerWert != 0) {
+                Endzeit = control.millis() - Startzeit
+                EingabeBeendet = 1
+            }
+        } else if (einerWert != 0) {
+            Endzeit = control.millis() - Startzeit
+            EingabeBeendet = 1
+        }
+        if (EingabeBeendet) {
+            if (einerWert + zehnerWert == Ergebnis) {
+                basic.showIcon(IconNames.Yes)
+                display(0, 2, convertToText(Endzeit))
+                I2C_LCD1602.clear()
+            } else {
+                basic.showIcon(IconNames.No)
+            }
+        }
+    }
     AufgabeAusstehend = 0
+    Zustand = 2
 }
 function bestimmeZahlvonP2 (portWert: number) {
     if (255 - portWert == 1) {
@@ -70,7 +90,6 @@ function InitSw () {
     ZeigeAufgabe = 0
     EingabeBeendet = 0
     Zustand = 0
-    operationText = 0
 }
 function bestimmeZahlvonP1 (portWert2: number) {
     if (255 - portWert2 == 1) {
@@ -103,7 +122,7 @@ function Menu () {
         Operation = 2
     }
     I2C_LCD1602.clear()
-    display(4, 1, "Start des Test mit 'A' Taste")
+    display(0, 1, "Start mit 'A'")
     Zustand = 2
 }
 function bestimmeZahlvonP0 (portWert3: number) {
@@ -154,25 +173,26 @@ function TestAusfuehrung () {
         display(5, 1, convertToText("" + Zahl1 + " " + ("" + operationText) + " " + ("" + Zahl2) + " = ?"))
         ZeigeAufgabe = 0
         Startzeit = control.millis()
+        Zustand = 3
     }
 }
-let Endzeit = 0
-let Startzeit = 0
 let Zahl2 = 0
 let Zahl1 = 0
+let operationText = ""
 let Operation = 0
 let RechenModus = 0
-let operationText = ""
-let EingabeBeendet = 0
 let ZeigeAufgabe = 0
-let Ergebnis = 0
 let X = 0
 let Y = 0
 let TestGestartet = 0
 let fehler = 0
+let EingabeBeendet = 0
+let Startzeit = 0
+let Endzeit = 0
 let zehnerWert = 0
-let AufgabeAusstehend = 0
 let einerWert = 0
+let Ergebnis = 0
+let AufgabeAusstehend = 0
 let P2 = 0
 let P1 = 0
 let P0 = 0
@@ -185,25 +205,12 @@ display(0, 2, "Ich starte.")
 basic.pause(1000)
 Zustand = 1
 basic.forever(function () {
-    if (AufgabeAusstehend == 1) {
-        if (Ergebnis < 10) {
-            if (einerWert != 0 && zehnerWert != 0) {
-                Endzeit = control.millis() - Startzeit
-                EingabeBeendet = 1
-            }
-        } else if (einerWert != 0) {
-            Endzeit = control.millis() - Startzeit
-            EingabeBeendet = 1
-        }
-    }
-})
-basic.forever(function () {
     if (Zustand == 1) {
         Menu()
     } else if (Zustand == 2) {
         TestAusfuehrung()
     } else if (Zustand == 3) {
-    	
+        PruefeEingabe()
     } else if (Zustand == 4) {
     	
     } else if (Zustand == 5) {

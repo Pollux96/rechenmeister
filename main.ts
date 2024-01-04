@@ -21,6 +21,9 @@ function leseTasten () {
         bestimmeZahlvonP2(P2)
     }
 }
+input.onButtonPressed(Button.A, function () {
+    TestGestartet = 1
+})
 function PruefeEingabe () {
     if (AufgabeAusstehend == 1) {
         if (Ergebnis > 10) {
@@ -36,14 +39,15 @@ function PruefeEingabe () {
             if (einerWert + zehnerWert == Ergebnis) {
                 basic.showIcon(IconNames.Yes)
                 display(0, 2, convertToText(Endzeit))
+                basic.pause(2000)
                 I2C_LCD1602.clear()
+                AufgabeAusstehend = 0
+                Zustand = 2
             } else {
                 basic.showIcon(IconNames.No)
             }
         }
     }
-    AufgabeAusstehend = 0
-    Zustand = 2
 }
 function bestimmeZahlvonP2 (portWert: number) {
     if (255 - portWert == 1) {
@@ -66,9 +70,6 @@ function bestimmeZahlvonP2 (portWert: number) {
         fehler = 1
     }
 }
-input.onButtonPressed(Button.AB, function () {
-    TestGestartet = 1
-})
 function display (x: number, y: number, Text: string) {
     if (y == 2) {
         Y = 0
@@ -122,20 +123,20 @@ function Menu () {
         Operation = 2
     }
     I2C_LCD1602.clear()
-    display(0, 1, "Start mit 'A'")
+    display(0, 1, "Starte mit 'A'")
     Zustand = 2
 }
 function bestimmeZahlvonP0 (portWert3: number) {
     if (255 - portWert3 == 1) {
-        einerWert = 5
-    } else if (255 - portWert3 == 2) {
         einerWert = 6
-    } else if (255 - portWert3 == 4) {
+    } else if (255 - portWert3 == 2) {
         einerWert = 7
-    } else if (255 - portWert3 == 8) {
+    } else if (255 - portWert3 == 4) {
         einerWert = 8
-    } else if (255 - portWert3 == 16) {
+    } else if (255 - portWert3 == 8) {
         einerWert = 9
+    } else if (255 - portWert3 == 16) {
+        einerWert = 0
     } else if (255 - portWert3 == 32) {
         zehnerWert = 60
     } else if (255 - portWert3 == 64) {
@@ -184,7 +185,6 @@ let RechenModus = 0
 let ZeigeAufgabe = 0
 let X = 0
 let Y = 0
-let TestGestartet = 0
 let fehler = 0
 let EingabeBeendet = 0
 let Startzeit = 0
@@ -193,6 +193,7 @@ let zehnerWert = 0
 let einerWert = 0
 let Ergebnis = 0
 let AufgabeAusstehend = 0
+let TestGestartet = 0
 let P2 = 0
 let P1 = 0
 let P0 = 0
@@ -215,5 +216,16 @@ basic.forever(function () {
     	
     } else if (Zustand == 5) {
     	
+    }
+})
+basic.forever(function () {
+    leseTasten()
+    if (einerWert != 0 || zehnerWert != 0) {
+        serial.writeNumber(zehnerWert)
+        serial.writeString("und")
+        serial.writeNumber(einerWert)
+        serial.writeLine("")
+        einerWert = 0
+        zehnerWert = 0
     }
 })

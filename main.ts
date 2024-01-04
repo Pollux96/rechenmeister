@@ -42,9 +42,14 @@ function PruefeEingabe () {
                 basic.pause(2000)
                 I2C_LCD1602.clear()
                 AufgabeAusstehend = 0
+                einerWert = 0
+                zehnerWert = 0
+                EingabeBeendet = 0
                 Zustand = 2
             } else {
                 basic.showIcon(IconNames.No)
+                basic.pause(2000)
+                I2C_LCD1602.clear()
             }
         }
     }
@@ -155,8 +160,8 @@ function TestAusfuehrung () {
         if (Operation == 1) {
             operationText = "+"
             while (Zahl1 + Zahl2 > 100 || Zahl1 + Zahl2 == 0) {
-                Zahl1 = randint(0, 100)
-                Zahl2 = randint(0, 100)
+                Zahl1 = randint(0, 4)
+                Zahl2 = randint(0, 4)
             }
             Ergebnis = Zahl1 + Zahl2
         } else {
@@ -216,16 +221,5 @@ basic.forever(function () {
     	
     } else if (Zustand == 5) {
     	
-    }
-})
-basic.forever(function () {
-    leseTasten()
-    if (einerWert != 0 || zehnerWert != 0) {
-        serial.writeNumber(zehnerWert)
-        serial.writeString("und")
-        serial.writeNumber(einerWert)
-        serial.writeLine("")
-        einerWert = 0
-        zehnerWert = 0
     }
 })

@@ -26,6 +26,7 @@ input.onButtonPressed(Button.A, function () {
 })
 function PruefeEingabe () {
     if (AufgabeAusstehend == 1) {
+        leseTasten()
         if (Ergebnis > 10) {
             if (einerWert != 0 && zehnerWert != 0) {
                 Endzeit = control.millis() - Startzeit
@@ -38,19 +39,20 @@ function PruefeEingabe () {
         if (EingabeBeendet) {
             if (einerWert + zehnerWert == Ergebnis) {
                 basic.showIcon(IconNames.Yes)
-                display(0, 2, convertToText(Endzeit))
-                basic.pause(2000)
-                I2C_LCD1602.clear()
-                AufgabeAusstehend = 0
-                einerWert = 0
-                zehnerWert = 0
-                EingabeBeendet = 0
-                Zustand = 2
             } else {
                 basic.showIcon(IconNames.No)
-                basic.pause(2000)
-                I2C_LCD1602.clear()
             }
+            display(14, 1, convertToText(Ergebnis))
+            display(0, 2, "" + convertToText(Endzeit) + "ms")
+            basic.pause(2000)
+            I2C_LCD1602.clear()
+            AufgabeAusstehend = 0
+            einerWert = 0
+            zehnerWert = 0
+            Zahl1 = 0
+            Zahl2 = 0
+            EingabeBeendet = 0
+            Zustand = 2
         }
     }
 }
@@ -122,6 +124,7 @@ function Menu () {
         leseTasten()
     }
     RechenModus = einerWert
+    einerWert = 0
     if (RechenModus == 2) {
         Operation = 1
     } else if (RechenModus == 3) {
@@ -160,8 +163,8 @@ function TestAusfuehrung () {
         if (Operation == 1) {
             operationText = "+"
             while (Zahl1 + Zahl2 > 100 || Zahl1 + Zahl2 == 0) {
-                Zahl1 = randint(0, 4)
-                Zahl2 = randint(0, 4)
+                Zahl1 = randint(0, 100)
+                Zahl2 = randint(0, 100)
             }
             Ergebnis = Zahl1 + Zahl2
         } else {
@@ -177,13 +180,12 @@ function TestAusfuehrung () {
     } else if (ZeigeAufgabe == 1) {
         I2C_LCD1602.clear()
         display(5, 1, convertToText("" + Zahl1 + " " + ("" + operationText) + " " + ("" + Zahl2) + " = ?"))
+        basic.showString("?")
         ZeigeAufgabe = 0
         Startzeit = control.millis()
         Zustand = 3
     }
 }
-let Zahl2 = 0
-let Zahl1 = 0
 let operationText = ""
 let Operation = 0
 let RechenModus = 0
@@ -191,6 +193,8 @@ let ZeigeAufgabe = 0
 let X = 0
 let Y = 0
 let fehler = 0
+let Zahl2 = 0
+let Zahl1 = 0
 let EingabeBeendet = 0
 let Startzeit = 0
 let Endzeit = 0

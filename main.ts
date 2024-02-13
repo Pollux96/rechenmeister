@@ -21,39 +21,33 @@ function leseTasten () {
         bestimmeZahlvonP2(P2)
     }
 }
-input.onButtonPressed(Button.A, function () {
-    TestGestartet = 1
-})
 function PruefeEingabe () {
-    if (AufgabeAusstehend == 1) {
-        leseTasten()
-        if (Ergebnis > 10) {
-            if (einerWert != 0 && zehnerWert != 0) {
-                Endzeit = control.millis() - Startzeit
-                EingabeBeendet = 1
-            }
-        } else if (einerWert != 0) {
+    leseTasten()
+    if (Ergebnis > 10) {
+        if (einerWert != 0 && zehnerWert != 0) {
             Endzeit = control.millis() - Startzeit
             EingabeBeendet = 1
         }
-        if (EingabeBeendet) {
-            if (einerWert + zehnerWert == Ergebnis) {
-                basic.showIcon(IconNames.Yes)
-            } else {
-                basic.showIcon(IconNames.No)
-            }
-            display(14, 1, convertToText(Ergebnis))
-            display(0, 2, "" + convertToText(Endzeit) + "ms")
-            basic.pause(2000)
-            I2C_LCD1602.clear()
-            AufgabeAusstehend = 0
-            einerWert = 0
-            zehnerWert = 0
-            Zahl1 = 0
-            Zahl2 = 0
-            EingabeBeendet = 0
-            Zustand = 2
+    } else if (einerWert != 0) {
+        Endzeit = control.millis() - Startzeit
+        EingabeBeendet = 1
+    }
+    if (EingabeBeendet) {
+        if (einerWert + zehnerWert == Ergebnis) {
+            basic.showIcon(IconNames.Yes)
+        } else {
+            basic.showIcon(IconNames.No)
         }
+        display(14, 1, convertToText(Ergebnis))
+        display(0, 2, "" + convertToText(Endzeit) + "ms")
+        basic.pause(2000)
+        I2C_LCD1602.clear()
+        einerWert = 0
+        zehnerWert = 0
+        Zahl1 = 0
+        Zahl2 = 0
+        EingabeBeendet = 0
+        Zustand = 2
     }
 }
 function bestimmeZahlvonP2 (portWert: number) {
@@ -95,7 +89,6 @@ function InitSw () {
     einerWert = 0
     zehnerWert = 0
     TestGestartet = 0
-    ZeigeAufgabe = 0
     EingabeBeendet = 0
     Zustand = 0
 }
@@ -131,8 +124,36 @@ function Menu () {
         Operation = 2
     }
     I2C_LCD1602.clear()
-    display(0, 1, "Starte mit 'A'")
+    TestGestartet = 1
     Zustand = 2
+}
+function ZeigeAufgabe2 () {
+    I2C_LCD1602.clear()
+    display(5, 1, convertToText("" + Zahl1 + " " + ("" + operationText) + " " + ("" + Zahl2) + " = ?"))
+    basic.showString("?")
+    Startzeit = control.millis()
+    Zustand = 4
+}
+function bestimmeAufgabe () {
+    if (RechenModus == 1) {
+        Operation = randint(1, 2)
+    }
+    if (Operation == 1) {
+        operationText = "+"
+        while (Zahl1 + Zahl2 > 100 || Zahl1 + Zahl2 == 0) {
+            Zahl1 = randint(0, 100)
+            Zahl2 = randint(0, 100)
+        }
+        Ergebnis = Zahl1 + Zahl2
+    } else {
+        operationText = "-"
+        while (Zahl1 - Zahl2 < 0 || Zahl1 - Zahl2 == 0) {
+            Zahl1 = randint(0, 100)
+            Zahl2 = randint(0, 100)
+        }
+        Ergebnis = Zahl1 - Zahl2
+    }
+    Zustand = 3
 }
 function bestimmeZahlvonP0 (portWert3: number) {
     if (255 - portWert3 == 1) {
@@ -155,41 +176,10 @@ function bestimmeZahlvonP0 (portWert3: number) {
         fehler = 1
     }
 }
-function TestAusfuehrung () {
-    if (TestGestartet == 1 && AufgabeAusstehend == 0) {
-        if (RechenModus == 1) {
-            Operation = randint(1, 2)
-        }
-        if (Operation == 1) {
-            operationText = "+"
-            while (Zahl1 + Zahl2 > 100 || Zahl1 + Zahl2 == 0) {
-                Zahl1 = randint(0, 100)
-                Zahl2 = randint(0, 100)
-            }
-            Ergebnis = Zahl1 + Zahl2
-        } else {
-            operationText = "-"
-            while (Zahl1 - Zahl2 < 0 || Zahl1 - Zahl2 == 0) {
-                Zahl1 = randint(0, 100)
-                Zahl2 = randint(0, 100)
-            }
-            Ergebnis = Zahl1 - Zahl2
-        }
-        AufgabeAusstehend = 1
-        ZeigeAufgabe = 1
-    } else if (ZeigeAufgabe == 1) {
-        I2C_LCD1602.clear()
-        display(5, 1, convertToText("" + Zahl1 + " " + ("" + operationText) + " " + ("" + Zahl2) + " = ?"))
-        basic.showString("?")
-        ZeigeAufgabe = 0
-        Startzeit = control.millis()
-        Zustand = 3
-    }
-}
 let operationText = ""
 let Operation = 0
 let RechenModus = 0
-let ZeigeAufgabe = 0
+let TestGestartet = 0
 let X = 0
 let Y = 0
 let fehler = 0
@@ -201,8 +191,6 @@ let Endzeit = 0
 let zehnerWert = 0
 let einerWert = 0
 let Ergebnis = 0
-let AufgabeAusstehend = 0
-let TestGestartet = 0
 let P2 = 0
 let P1 = 0
 let P0 = 0
@@ -218,11 +206,11 @@ basic.forever(function () {
     if (Zustand == 1) {
         Menu()
     } else if (Zustand == 2) {
-        TestAusfuehrung()
+        bestimmeAufgabe()
     } else if (Zustand == 3) {
-        PruefeEingabe()
+        ZeigeAufgabe2()
     } else if (Zustand == 4) {
-    	
+        PruefeEingabe()
     } else if (Zustand == 5) {
     	
     }

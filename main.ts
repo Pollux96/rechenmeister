@@ -52,23 +52,21 @@ function PruefeEingabe () {
 }
 function bestimmeZahlvonP2 (portWert: number) {
     if (255 - portWert == 1) {
-        einerWert = 1
+        EingabeZeichen = "0"
     } else if (255 - portWert == 2) {
-        einerWert = 2
+        EingabeZeichen = "1"
     } else if (255 - portWert == 4) {
-        einerWert = 3
+        EingabeZeichen = "2"
     } else if (255 - portWert == 8) {
-        einerWert = 4
+        EingabeZeichen = "3"
     } else if (255 - portWert == 16) {
-        einerWert = 5
+        EingabeZeichen = "4"
     } else if (255 - portWert == 32) {
-        zehnerWert = 10
+        EingabeZeichen = "del"
     } else if (255 - portWert == 64) {
-        zehnerWert = 20
+        EingabeZeichen = ""
     } else if (255 - portWert == 128) {
-        zehnerWert = 30
-    } else {
-        fehler = 1
+        EingabeZeichen = ""
     }
 }
 function display (x: number, y: number, Text: string) {
@@ -91,18 +89,17 @@ function InitSw () {
     TestGestartet = 0
     EingabeBeendet = 0
     Zustand = 0
+    debug = 1
 }
 function bestimmeZahlvonP1 (portWert2: number) {
     if (255 - portWert2 == 1) {
-        zehnerWert = 40
+        EingabeZeichen = ""
     } else if (255 - portWert2 == 2) {
-        zehnerWert = 50
+        EingabeZeichen = "down"
     } else if (255 - portWert2 == 4) {
-        zehnerWert = 90
+        EingabeZeichen = ""
     } else if (255 - portWert2 == 8) {
-        zehnerWert = 100
-    } else {
-        fehler = 1
+        EingabeZeichen = "e"
     }
 }
 function Menu () {
@@ -155,34 +152,49 @@ function bestimmeAufgabe () {
     }
     Zustand = 3
 }
-function bestimmeZahlvonP0 (portWert3: number) {
-    if (255 - portWert3 == 1) {
-        einerWert = 6
-    } else if (255 - portWert3 == 2) {
-        einerWert = 7
-    } else if (255 - portWert3 == 4) {
-        einerWert = 8
-    } else if (255 - portWert3 == 8) {
-        einerWert = 9
-    } else if (255 - portWert3 == 16) {
-        einerWert = 0
-    } else if (255 - portWert3 == 32) {
-        zehnerWert = 60
-    } else if (255 - portWert3 == 64) {
-        zehnerWert = 70
-    } else if (255 - portWert3 == 128) {
-        zehnerWert = 80
-    } else {
-        fehler = 1
+function leseZahl () {
+    while (EingabeZeichen.compare("e") != 0) {
+        leseTasten()
+        if (EingabeZeichen.compare("del") != 0) {
+            EingabeZahl = EingabeZahl.substr(0, EingabeZahl.length - 1)
+        } else {
+            EingabeZahl = "" + EingabeZahl + EingabeZeichen
+        }
+        EingabeZeichen = ""
+        if (debug) {
+            display(0, 3, EingabeZeichen)
+            display(5, 3, EingabeZahl)
+        }
     }
 }
+function bestimmeZahlvonP0 (portWert3: number) {
+    if (255 - portWert3 == 1) {
+        EingabeZeichen = "5"
+    } else if (255 - portWert3 == 2) {
+        EingabeZeichen = "6"
+    } else if (255 - portWert3 == 4) {
+        EingabeZeichen = "7"
+    } else if (255 - portWert3 == 8) {
+        EingabeZeichen = "8"
+    } else if (255 - portWert3 == 16) {
+        EingabeZeichen = "9"
+    } else if (255 - portWert3 == 32) {
+        EingabeZeichen = "up"
+    } else if (255 - portWert3 == 64) {
+        EingabeZeichen = ""
+    } else if (255 - portWert3 == 128) {
+        EingabeZeichen = ""
+    }
+}
+let EingabeZahl = ""
 let operationText = ""
 let Operation = 0
 let RechenModus = 0
+let debug = 0
 let TestGestartet = 0
 let X = 0
 let Y = 0
-let fehler = 0
+let EingabeZeichen = ""
 let Zahl2 = 0
 let Zahl1 = 0
 let EingabeBeendet = 0
@@ -197,6 +209,7 @@ let P0 = 0
 let Zustand = 0
 InitHw()
 InitSw()
+basic.showIcon(IconNames.Happy)
 display(0, 0, "Hallo")
 display(0, 1, "Rechenkuenstler.")
 display(0, 2, "Ich starte.")
@@ -204,7 +217,7 @@ basic.pause(1000)
 Zustand = 1
 basic.forever(function () {
     if (Zustand == 1) {
-        Menu()
+        leseZahl()
     } else if (Zustand == 2) {
         bestimmeAufgabe()
     } else if (Zustand == 3) {

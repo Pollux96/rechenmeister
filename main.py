@@ -17,32 +17,31 @@ def leseTasten():
         control.wait_micros(40000)
         P2 = pins.i2c_read_number(34, NumberFormat.UINT8_LE, False)
         bestimmeZahlvonP2(P2)
-
-def on_button_pressed_a():
-    global TestGestartet
-    TestGestartet = 1
-input.on_button_pressed(Button.A, on_button_pressed_a)
-
 def PruefeEingabe():
-    global Endzeit, EingabeBeendet, AufgabeAusstehend, Zustand
-    if AufgabeAusstehend == 1:
-        if Ergebnis > 10:
-            if einerWert != 0 and zehnerWert != 0:
-                Endzeit = control.millis() - Startzeit
-                EingabeBeendet = 1
-        elif einerWert != 0:
+    global Endzeit, EingabeBeendet, einerWert, zehnerWert, Zahl1, Zahl2, Zustand
+    leseTasten()
+    if Ergebnis > 10:
+        if einerWert != 0 and zehnerWert != 0:
             Endzeit = control.millis() - Startzeit
             EingabeBeendet = 1
-        if EingabeBeendet:
-            if einerWert + zehnerWert == Ergebnis:
-                basic.show_icon(IconNames.YES)
-                display(0, 2, convert_to_text(Endzeit))
-                basic.pause(2000)
-                I2C_LCD1602.clear()
-                AufgabeAusstehend = 0
-                Zustand = 2
-            else:
-                basic.show_icon(IconNames.NO)
+    elif einerWert != 0:
+        Endzeit = control.millis() - Startzeit
+        EingabeBeendet = 1
+    if EingabeBeendet:
+        if einerWert + zehnerWert == Ergebnis:
+            basic.show_icon(IconNames.YES)
+        else:
+            basic.show_icon(IconNames.NO)
+        display(14, 1, convert_to_text(Ergebnis))
+        display(0, 2, "" + convert_to_text(Endzeit) + "ms")
+        basic.pause(2000)
+        I2C_LCD1602.clear()
+        einerWert = 0
+        zehnerWert = 0
+        Zahl1 = 0
+        Zahl2 = 0
+        EingabeBeendet = 0
+        Zustand = 2
 def bestimmeZahlvonP2(portWert: number):
     global einerWert, zehnerWert, fehler
     if 255 - portWert == 1:
@@ -76,12 +75,11 @@ def display(x: number, y: number, Text: str):
         X = x
     I2C_LCD1602.show_string(Text, X, Y)
 def InitSw():
-    global Ergebnis, einerWert, zehnerWert, TestGestartet, ZeigeAufgabe, EingabeBeendet, Zustand
+    global Ergebnis, einerWert, zehnerWert, TestGestartet, EingabeBeendet, Zustand
     Ergebnis = 0
     einerWert = 0
     zehnerWert = 0
     TestGestartet = 0
-    ZeigeAufgabe = 0
     EingabeBeendet = 0
     Zustand = 0
 def bestimmeZahlvonP1(portWert2: number):
@@ -97,7 +95,7 @@ def bestimmeZahlvonP1(portWert2: number):
     else:
         fehler = 1
 def Menu():
-    global RechenModus, Operation, Zustand
+    global RechenModus, einerWert, Operation, TestGestartet, Zustand
     I2C_LCD1602.clear()
     display(0, 0, "SCHWARZE KNOEPFE")
     basic.pause(2000)
@@ -108,13 +106,43 @@ def Menu():
     while einerWert == 0:
         leseTasten()
     RechenModus = einerWert
+    einerWert = 0
     if RechenModus == 2:
         Operation = 1
     elif RechenModus == 3:
         Operation = 2
     I2C_LCD1602.clear()
-    display(0, 1, "Starte mit 'A'")
+    TestGestartet = 1
     Zustand = 2
+def ZeigeAufgabe2():
+    global Startzeit, Zustand
+    I2C_LCD1602.clear()
+    display(5,
+        1,
+        convert_to_text("" + str(Zahl1) + " " + ("" + operationText) + " " + ("" + str(Zahl2)) + " = ?"))
+    basic.show_string("?")
+    Startzeit = control.millis()
+    Zustand = 4
+def bestimmeAufgabe():
+    global Operation, operationText, Zahl1, Zahl2, Ergebnis, Zustand
+    if RechenModus == 1:
+        Operation = randint(1, 2)
+    if Operation == 1:
+        operationText = "+"
+        while Zahl1 + Zahl2 > 100 or Zahl1 + Zahl2 == 0:
+            Zahl1 = randint(0, 100)
+            Zahl2 = randint(0, 100)
+        Ergebnis = Zahl1 + Zahl2
+    else:
+        operationText = "-"
+        while Zahl1 - Zahl2 < 0 or Zahl1 - Zahl2 == 0:
+            Zahl1 = randint(0, 100)
+            Zahl2 = randint(0, 100)
+        Ergebnis = Zahl1 - Zahl2
+    Zustand = 3
+def leseZahl():
+    while einerWert == 0:
+        leseTasten()
 def bestimmeZahlvonP0(portWert3: number):
     global einerWert, zehnerWert, fehler
     if 255 - portWert3 == 1:
@@ -135,56 +163,28 @@ def bestimmeZahlvonP0(portWert3: number):
         zehnerWert = 80
     else:
         fehler = 1
-def TestAusfuehrung():
-    global Operation, operationText, Zahl1, Zahl2, Ergebnis, AufgabeAusstehend, ZeigeAufgabe, Startzeit, Zustand
-    if TestGestartet == 1 and AufgabeAusstehend == 0:
-        if RechenModus == 1:
-            Operation = randint(1, 2)
-        if Operation == 1:
-            operationText = "+"
-            while Zahl1 + Zahl2 > 100 or Zahl1 + Zahl2 == 0:
-                Zahl1 = randint(0, 100)
-                Zahl2 = randint(0, 100)
-            Ergebnis = Zahl1 + Zahl2
-        else:
-            operationText = "-"
-            while Zahl1 - Zahl2 < 0 or Zahl1 - Zahl2 == 0:
-                Zahl1 = randint(0, 100)
-                Zahl2 = randint(0, 100)
-            Ergebnis = Zahl1 - Zahl2
-        AufgabeAusstehend = 1
-        ZeigeAufgabe = 1
-    elif ZeigeAufgabe == 1:
-        I2C_LCD1602.clear()
-        display(5,
-            1,
-            convert_to_text("" + str(Zahl1) + " " + ("" + operationText) + " " + ("" + str(Zahl2)) + " = ?"))
-        ZeigeAufgabe = 0
-        Startzeit = control.millis()
-        Zustand = 3
-Zahl2 = 0
-Zahl1 = 0
 operationText = ""
 Operation = 0
 RechenModus = 0
-ZeigeAufgabe = 0
+TestGestartet = 0
 X = 0
 Y = 0
 fehler = 0
+Zahl2 = 0
+Zahl1 = 0
 EingabeBeendet = 0
 Startzeit = 0
 Endzeit = 0
 zehnerWert = 0
 einerWert = 0
 Ergebnis = 0
-AufgabeAusstehend = 0
-TestGestartet = 0
 P2 = 0
 P1 = 0
 P0 = 0
 Zustand = 0
 InitHw()
 InitSw()
+basic.show_icon(IconNames.HAPPY)
 display(0, 0, "Hallo")
 display(0, 1, "Rechenkuenstler.")
 display(0, 2, "Ich starte.")
@@ -195,23 +195,11 @@ def on_forever():
     if Zustand == 1:
         Menu()
     elif Zustand == 2:
-        TestAusfuehrung()
+        bestimmeAufgabe()
     elif Zustand == 3:
-        PruefeEingabe()
+        ZeigeAufgabe2()
     elif Zustand == 4:
-        pass
+        PruefeEingabe()
     elif Zustand == 5:
         pass
 basic.forever(on_forever)
-
-def on_forever2():
-    global einerWert, zehnerWert
-    leseTasten()
-    if einerWert != 0 or zehnerWert != 0:
-        serial.write_number(zehnerWert)
-        serial.write_string("und")
-        serial.write_number(einerWert)
-        serial.write_line("")
-        einerWert = 0
-        zehnerWert = 0
-basic.forever(on_forever2)

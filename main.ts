@@ -21,6 +21,9 @@ function leseTasten () {
         bestimmeZahlvonP2(P2)
     }
 }
+input.onButtonPressed(Button.A, function () {
+    debug = 1
+})
 function PruefeEingabe () {
     leseTasten()
     if (Ergebnis > 10) {
@@ -89,7 +92,7 @@ function InitSw () {
     TestGestartet = 0
     EingabeBeendet = 0
     Zustand = 0
-    debug = 1
+    debug = 0
 }
 function bestimmeZahlvonP1 (portWert2: number) {
     if (255 - portWert2 == 1) {
@@ -110,11 +113,10 @@ function Menu () {
     display(0, 0, "1 Plus & Minus")
     display(0, 1, "2 Plus")
     display(0, 2, "3 Minus")
-    while (einerWert == 0) {
+    while (EingabeZeichen.isEmpty()) {
         leseTasten()
     }
-    RechenModus = einerWert
-    einerWert = 0
+    RechenModus = parseFloat(EingabeZeichen)
     if (RechenModus == 2) {
         Operation = 1
     } else if (RechenModus == 3) {
@@ -153,17 +155,25 @@ function bestimmeAufgabe () {
     Zustand = 3
 }
 function leseZahl () {
-    while (EingabeZeichen.compare("e") != 0) {
+    while (true) {
         leseTasten()
-        if (EingabeZeichen.compare("del") != 0) {
+        if (EingabeZeichen.isEmpty()) {
+            continue;
+        }
+        if (EingabeZeichen.compare("del") == 0) {
             EingabeZahl = EingabeZahl.substr(0, EingabeZahl.length - 1)
         } else {
             EingabeZahl = "" + EingabeZahl + EingabeZeichen
         }
-        EingabeZeichen = ""
         if (debug) {
             display(0, 3, EingabeZeichen)
+            display(5, 3, "               ")
             display(5, 3, EingabeZahl)
+        }
+        if (EingabeZeichen.compare("e") == 0) {
+            break;
+        } else {
+            EingabeZeichen = ""
         }
     }
 }
@@ -190,7 +200,6 @@ let EingabeZahl = ""
 let operationText = ""
 let Operation = 0
 let RechenModus = 0
-let debug = 0
 let TestGestartet = 0
 let X = 0
 let Y = 0
@@ -203,6 +212,7 @@ let Endzeit = 0
 let zehnerWert = 0
 let einerWert = 0
 let Ergebnis = 0
+let debug = 0
 let P2 = 0
 let P1 = 0
 let P0 = 0
@@ -217,7 +227,7 @@ basic.pause(1000)
 Zustand = 1
 basic.forever(function () {
     if (Zustand == 1) {
-        leseZahl()
+        Menu()
     } else if (Zustand == 2) {
         bestimmeAufgabe()
     } else if (Zustand == 3) {

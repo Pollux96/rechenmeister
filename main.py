@@ -43,25 +43,23 @@ def PruefeEingabe():
         EingabeBeendet = 0
         Zustand = 2
 def bestimmeZahlvonP2(portWert: number):
-    global einerWert, zehnerWert, fehler
+    global EingabeZeichen
     if 255 - portWert == 1:
-        einerWert = 1
+        EingabeZeichen = "0"
     elif 255 - portWert == 2:
-        einerWert = 2
+        EingabeZeichen = "1"
     elif 255 - portWert == 4:
-        einerWert = 3
+        EingabeZeichen = "2"
     elif 255 - portWert == 8:
-        einerWert = 4
+        EingabeZeichen = "3"
     elif 255 - portWert == 16:
-        einerWert = 5
+        EingabeZeichen = "4"
     elif 255 - portWert == 32:
-        zehnerWert = 10
+        EingabeZeichen = "del"
     elif 255 - portWert == 64:
-        zehnerWert = 20
+        EingabeZeichen = ""
     elif 255 - portWert == 128:
-        zehnerWert = 30
-    else:
-        fehler = 1
+        EingabeZeichen = ""
 def display(x: number, y: number, Text: str):
     global Y, X
     if y == 2:
@@ -75,25 +73,24 @@ def display(x: number, y: number, Text: str):
         X = x
     I2C_LCD1602.show_string(Text, X, Y)
 def InitSw():
-    global Ergebnis, einerWert, zehnerWert, TestGestartet, EingabeBeendet, Zustand
+    global Ergebnis, einerWert, zehnerWert, TestGestartet, EingabeBeendet, Zustand, debug
     Ergebnis = 0
     einerWert = 0
     zehnerWert = 0
     TestGestartet = 0
     EingabeBeendet = 0
     Zustand = 0
+    debug = 1
 def bestimmeZahlvonP1(portWert2: number):
-    global zehnerWert, fehler
+    global EingabeZeichen
     if 255 - portWert2 == 1:
-        zehnerWert = 40
+        EingabeZeichen = ""
     elif 255 - portWert2 == 2:
-        zehnerWert = 50
+        EingabeZeichen = "down"
     elif 255 - portWert2 == 4:
-        zehnerWert = 90
+        EingabeZeichen = ""
     elif 255 - portWert2 == 8:
-        zehnerWert = 100
-    else:
-        fehler = 1
+        EingabeZeichen = "e"
 def Menu():
     global RechenModus, einerWert, Operation, TestGestartet, Zustand
     I2C_LCD1602.clear()
@@ -141,35 +138,44 @@ def bestimmeAufgabe():
         Ergebnis = Zahl1 - Zahl2
     Zustand = 3
 def leseZahl():
-    while einerWert == 0:
+    global EingabeZahl, EingabeZeichen
+    while EingabeZeichen.compare("e") != 0:
         leseTasten()
+        if EingabeZeichen.compare("del") != 0:
+            EingabeZahl = EingabeZahl.substr(0, len(EingabeZahl) - 1)
+        else:
+            EingabeZahl = "" + EingabeZahl + EingabeZeichen
+        EingabeZeichen = ""
+        if debug:
+            display(0, 3, EingabeZeichen)
+            display(5, 3, EingabeZahl)
 def bestimmeZahlvonP0(portWert3: number):
-    global einerWert, zehnerWert, fehler
+    global EingabeZeichen
     if 255 - portWert3 == 1:
-        einerWert = 6
+        EingabeZeichen = "5"
     elif 255 - portWert3 == 2:
-        einerWert = 7
+        EingabeZeichen = "6"
     elif 255 - portWert3 == 4:
-        einerWert = 8
+        EingabeZeichen = "7"
     elif 255 - portWert3 == 8:
-        einerWert = 9
+        EingabeZeichen = "8"
     elif 255 - portWert3 == 16:
-        einerWert = 0
+        EingabeZeichen = "9"
     elif 255 - portWert3 == 32:
-        zehnerWert = 60
+        EingabeZeichen = "up"
     elif 255 - portWert3 == 64:
-        zehnerWert = 70
+        EingabeZeichen = ""
     elif 255 - portWert3 == 128:
-        zehnerWert = 80
-    else:
-        fehler = 1
+        EingabeZeichen = ""
+EingabeZahl = ""
 operationText = ""
 Operation = 0
 RechenModus = 0
+debug = 0
 TestGestartet = 0
 X = 0
 Y = 0
-fehler = 0
+EingabeZeichen = ""
 Zahl2 = 0
 Zahl1 = 0
 EingabeBeendet = 0
@@ -193,6 +199,7 @@ Zustand = 1
 
 def on_forever():
     if Zustand == 1:
+        leseZahl()
         Menu()
     elif Zustand == 2:
         bestimmeAufgabe()

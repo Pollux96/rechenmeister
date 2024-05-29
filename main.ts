@@ -110,9 +110,10 @@ function Menu () {
     display(0, 0, "SCHWARZE KNOEPFE")
     basic.pause(2000)
     I2C_LCD1602.clear()
-    display(0, 0, "1 Plus & Minus")
+    display(0, 0, "1 Plus & Minus & Mal")
     display(0, 1, "2 Plus")
     display(0, 2, "3 Minus")
+    display(0, 3, "4 Mal")
     while (EingabeZeichen.isEmpty()) {
         leseTasten()
     }
@@ -121,6 +122,8 @@ function Menu () {
         Operation = 1
     } else if (RechenModus == 3) {
         Operation = 2
+    } else if (RechenModus == 4) {
+        Operation = 3
     }
     I2C_LCD1602.clear()
     TestGestartet = 1

@@ -47,8 +47,8 @@ function PruefeEingabe () {
         basic.showIcon(IconNames.Yes)
     } else {
         basic.showIcon(IconNames.No)
+        display2(4 + AufgabenText.length, 2, convertToText(Ergebnis))
     }
-    display2(14, 2, convertToText(Ergebnis))
     display2(0, 3, "" + convertToText(Endzeit) + "ms")
     basic.pause(2000)
     I2C_LCD1602.clear()
@@ -184,7 +184,7 @@ function leseZahl () {
             }
             EingabeZahl = "" + EingabeZahl + EingabeZeichen
         }
-        display2(4 + AufgabenText.length, 1, "               ")
+        display2(4 + AufgabenText.length, 1, "   ")
         display2(4 + AufgabenText.length, 1, EingabeZahl)
     }
 }

@@ -5,7 +5,8 @@
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "i2cLCD1602": "github:makecode-extensions/i2clcd1602#v1.5.0"
+        "i2cLCD1602": "github:makecode-extensions/i2clcd1602#v1.5.0",
+        "microbit-pxt-rotate": "github:bsiever/microbit-pxt-rotate#v0.1.6"
     },
     "files": [
         "main.blocks",

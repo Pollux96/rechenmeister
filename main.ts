@@ -172,8 +172,8 @@ function Menu () {
 function MenuAnzahlAufgaben () {
     I2C_LCD1602.clear()
     display2(0, 0, "Anzahl Aufgaben")
-    display2(0, 1, "1>5 Aufgaben")
-    display2(0, 2, "2>10 Aufgaben")
+    display2(0, 1, "")
+    display2(0, 2, "")
     display2(0, 3, "3>15 Aufgaben")
     EingabeZeichen = ""
     while (EingabeZeichen.isEmpty() || (parseFloat(EingabeZeichen) < 1 || parseFloat(EingabeZeichen) > 3)) {

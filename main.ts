@@ -228,16 +228,10 @@ let EingabeZeichen = ""
 let Zustand = 0
 InitHw()
 InitSw()
+basic.showIcon(IconNames.Happy)
 display2(0, 0, "Hallo")
 display2(0, 1, "Rechenkuenstler.")
 display2(0, 2, "Ich starte.")
-basic.showString("" + (images.createBigImage(`
-    . . # . . . . . . #
-    . # # . . . . . # #
-    # . # . # # . # . #
-    . . # . . . . . . #
-    . . # . . . . . . #
-    `)))
 basic.pause(1000)
 Zustand = 1
 basic.forever(function () {

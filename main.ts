@@ -4,6 +4,9 @@ function InitHw () {
     pins.setPull(DigitalPin.P1, PinPullMode.PullUp)
     pins.setPull(DigitalPin.P2, PinPullMode.PullUp)
 }
+function Statistik () {
+	
+}
 function leseTasten () {
     EingabeZeichen = ""
     if (pins.digitalReadPin(DigitalPin.P0) == 0) {
@@ -56,6 +59,9 @@ function PruefeEingabe () {
     Zahl2 = 0
     EingabeZahl = ""
     Zustand = 2
+    if (SchonGerechneteAufgaben == AufgabenAnzahl) {
+        Zustand = 5
+    }
 }
 function bestimmeZahlvonP2 (portWert: number) {
     if (255 - portWert == 1) {
@@ -90,6 +96,7 @@ function display2 (x: number, y: number, Text: string) {
     I2C_LCD1602.ShowString(Text, X, Y)
 }
 function InitSw () {
+    SchonGerechneteAufgaben = 0
     Ergebnis = 0
     TestGestartet = 0
     Zustand = 0
@@ -137,11 +144,12 @@ function Menu () {
 }
 function MenuAnzahlAufgaben () {
     I2C_LCD1602.clear()
-    display2(0, 0, "Auswahl Anzahl Aufgaben")
-    display2(0, 1, "1:5 Aufgaben")
-    display2(0, 1, "2:10 Aufgaben")
-    display2(0, 1, "3:15 Aufgaben")
-    while (EingabeZeichen.isEmpty() || (parseFloat(EingabeZeichen) < 1 || parseFloat(EingabeZeichen) > 4)) {
+    display2(0, 0, "Anzahl Aufgaben")
+    display2(0, 1, "1>5 Aufgaben")
+    display2(0, 2, "2>10 Aufgaben")
+    display2(0, 3, "3>15 Aufgaben")
+    EingabeZeichen = ""
+    while (EingabeZeichen.isEmpty() || (parseFloat(EingabeZeichen) < 1 || parseFloat(EingabeZeichen) > 3)) {
         leseTasten()
     }
     if (parseFloat(EingabeZeichen) == 1) {
@@ -151,9 +159,11 @@ function MenuAnzahlAufgaben () {
     } else if (parseFloat(EingabeZeichen) == 3) {
         AufgabenAnzahl = 15
     }
+    list = [1, AufgabenAnzahl]
 }
 function bestimmeAufgabe () {
     if (RechenModus == 1) {
+        MenuAnzahlAufgaben()
         BestimmeZufallsoperation()
     }
     if (operationText.compare("+") == 0) {
@@ -184,6 +194,7 @@ function bestimmeAufgabe () {
             }
         }
     }
+    SchonGerechneteAufgaben = SchonGerechneteAufgaben + 1
     Zustand = 3
 }
 function leseZahl () {
@@ -224,11 +235,13 @@ function bestimmeZahlvonP0 (portWert3: number) {
         EingabeZeichen = ""
     }
 }
+let list: number[] = []
 let RechenModus = 0
-let AufgabenAnzahl = 0
 let TestGestartet = 0
 let X = 0
 let Y = 0
+let AufgabenAnzahl = 0
+let SchonGerechneteAufgaben = 0
 let Ergebnis = 0
 let EingabeZahl = ""
 let Endzeit = 0

@@ -95,6 +95,7 @@ function InitSw () {
     Zustand = 0
     Zahl1 = 0
     Zahl2 = 0
+    AufgabenAnzahl = 0
 }
 function bestimmeZahlvonP1 (portWert2: number) {
     if (255 - portWert2 == 1) {
@@ -135,7 +136,21 @@ function Menu () {
     Zustand = 2
 }
 function MenuAnzahlAufgaben () {
-	
+    I2C_LCD1602.clear()
+    display2(0, 0, "Auswahl Anzahl Aufgaben")
+    display2(0, 1, "1:5 Aufgaben")
+    display2(0, 1, "2:10 Aufgaben")
+    display2(0, 1, "3:15 Aufgaben")
+    while (EingabeZeichen.isEmpty() || (parseFloat(EingabeZeichen) < 1 || parseFloat(EingabeZeichen) > 4)) {
+        leseTasten()
+    }
+    if (parseFloat(EingabeZeichen) == 1) {
+        AufgabenAnzahl = 5
+    } else if (parseFloat(EingabeZeichen) == 2) {
+        AufgabenAnzahl = 10
+    } else if (parseFloat(EingabeZeichen) == 3) {
+        AufgabenAnzahl = 15
+    }
 }
 function bestimmeAufgabe () {
     if (RechenModus == 1) {
@@ -210,6 +225,7 @@ function bestimmeZahlvonP0 (portWert3: number) {
     }
 }
 let RechenModus = 0
+let AufgabenAnzahl = 0
 let TestGestartet = 0
 let X = 0
 let Y = 0

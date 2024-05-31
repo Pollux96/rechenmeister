@@ -57,6 +57,9 @@ function PruefeEingabe () {
     EingabeZahl = ""
     Zustand = 2
 }
+input.onButtonPressed(Button.A, function () {
+    debug = 1
+})
 function bestimmeZahlvonP2 (portWert: number) {
     if (255 - portWert == 1) {
         EingabeZeichen = "0"
@@ -93,6 +96,7 @@ function InitSw () {
     Ergebnis = 0
     TestGestartet = 0
     Zustand = 0
+    debug = 0
     Zahl1 = 0
     Zahl2 = 0
 }
@@ -207,6 +211,7 @@ let RechenModus = 0
 let TestGestartet = 0
 let X = 0
 let Y = 0
+let debug = 0
 let Ergebnis = 0
 let EingabeZahl = ""
 let Endzeit = 0

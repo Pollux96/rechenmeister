@@ -5,7 +5,32 @@ function InitHw () {
     pins.setPull(DigitalPin.P2, PinPullMode.PullUp)
 }
 function Statistik () {
-	
+    display2(0, 0, "Statistik")
+    display2(0, 1, list[1])
+    display2(0, 2, list[2])
+    display2(0, 3, list[3])
+    basic.pause(5000)
+    I2C_LCD1602.clear()
+    display2(0, 0, list[4])
+    display2(0, 1, list[5])
+    display2(0, 2, list[6])
+    display2(0, 3, list[6])
+    basic.pause(5000)
+    I2C_LCD1602.clear()
+    display2(0, 0, list[7])
+    display2(0, 1, list[8])
+    display2(0, 2, list[9])
+    display2(0, 3, list[10])
+    basic.pause(5000)
+    I2C_LCD1602.clear()
+    display2(0, 0, list[11])
+    display2(0, 1, list[11])
+    display2(0, 2, list[12])
+    display2(0, 3, list[13])
+    basic.pause(5000)
+    I2C_LCD1602.clear()
+    display2(0, 0, list[14])
+    display2(0, 1, list[15])
 }
 function leseTasten () {
     EingabeZeichen = ""
@@ -52,7 +77,6 @@ function PruefeEingabe () {
         basic.showIcon(IconNames.No)
         display2(4 + AufgabenText.length, 2, convertToText(Ergebnis))
     }
-    display2(0, 3, "" + convertToText(Endzeit) + "ms")
     basic.pause(2000)
     I2C_LCD1602.clear()
     Zahl1 = 0
@@ -62,6 +86,7 @@ function PruefeEingabe () {
     if (SchonGerechneteAufgaben == AufgabenAnzahl) {
         Zustand = 5
     }
+    list[SchonGerechneteAufgaben] = "" + SchonGerechneteAufgaben + ">" + convertToText(Endzeit) + "ms"
 }
 function bestimmeZahlvonP2 (portWert: number) {
     if (255 - portWert == 1) {
@@ -103,6 +128,7 @@ function InitSw () {
     Zahl1 = 0
     Zahl2 = 0
     AufgabenAnzahl = 0
+    list = [""]
 }
 function bestimmeZahlvonP1 (portWert2: number) {
     if (255 - portWert2 == 1) {
@@ -116,6 +142,7 @@ function bestimmeZahlvonP1 (portWert2: number) {
     }
 }
 function Menu () {
+    MenuAnzahlAufgaben2 = 1
     I2C_LCD1602.clear()
     display2(0, 0, "SCHWARZE KNOEPFE")
     basic.pause(2000)
@@ -153,17 +180,18 @@ function MenuAnzahlAufgaben () {
         leseTasten()
     }
     if (parseFloat(EingabeZeichen) == 1) {
-        AufgabenAnzahl = 5
+        qqwqdfgg = 5
     } else if (parseFloat(EingabeZeichen) == 2) {
-        AufgabenAnzahl = 10
+        qqwqdfgg = 10
     } else if (parseFloat(EingabeZeichen) == 3) {
         AufgabenAnzahl = 15
     }
-    list = [1, AufgabenAnzahl]
 }
 function bestimmeAufgabe () {
     if (RechenModus == 1) {
-        MenuAnzahlAufgaben()
+        if (MenuAnzahlAufgaben2 == 1) {
+            MenuAnzahlAufgaben()
+        }
         BestimmeZufallsoperation()
     }
     if (operationText.compare("+") == 0) {
@@ -196,6 +224,7 @@ function bestimmeAufgabe () {
     }
     SchonGerechneteAufgaben = SchonGerechneteAufgaben + 1
     Zustand = 3
+    MenuAnzahlAufgaben2 = 0
 }
 function leseZahl () {
     while (true) {
@@ -235,8 +264,9 @@ function bestimmeZahlvonP0 (portWert3: number) {
         EingabeZeichen = ""
     }
 }
-let list: number[] = []
+let qqwqdfgg = 0
 let RechenModus = 0
+let MenuAnzahlAufgaben2 = 0
 let TestGestartet = 0
 let X = 0
 let Y = 0
@@ -255,6 +285,7 @@ let P2 = 0
 let P1 = 0
 let P0 = 0
 let EingabeZeichen = ""
+let list: string[] = []
 let Zustand = 0
 InitHw()
 InitSw()
@@ -274,6 +305,6 @@ basic.forever(function () {
     } else if (Zustand == 4) {
         PruefeEingabe()
     } else if (Zustand == 5) {
-    	
+        Statistik()
     }
 })

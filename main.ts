@@ -11,7 +11,7 @@ function Statistik () {
     }
     display2(0, 1, "Gesamtzeit:" + convertToText(Gesamtzeit) + "ms")
     display2(0, 2, "Durchschn.:" + convertToText(Math.abs(Gesamtzeit / list.length)) + "ms")
-    display2(0, 2, "R:" + convertToText(richtig) + " F:" + convertToText(falsch))
+    display2(0, 3, "R:" + convertToText(richtig) + " F:" + convertToText(falsch))
     leseZahl()
     Start()
 }

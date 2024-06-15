@@ -11,6 +11,7 @@ function Statistik () {
     }
     display2(0, 1, "Gesamtzeit:" + convertToText(Gesamtzeit) + "ms")
     display2(0, 2, "Durchschn.:" + convertToText(Math.abs(Gesamtzeit / list.length)) + "ms")
+    display2(0, 2, "R:" + convertToText(richtig) + " F:" + convertToText(falsch))
     leseZahl()
     Start()
 }
@@ -268,8 +269,6 @@ let TestGestartet = 0
 let X = 0
 let Y = 0
 let AufgabenAnzahl = 0
-let falsch = 0
-let richtig = 0
 let Ergebnis = 0
 let EingabeZahl = ""
 let Endzeit = 0
@@ -285,6 +284,8 @@ let P2 = 0
 let P1 = 0
 let P0 = 0
 let EingabeZeichen = ""
+let falsch = 0
+let richtig = 0
 let Gesamtzeit = 0
 let list: number[] = []
 Start()

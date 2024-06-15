@@ -6,31 +6,13 @@ function InitHw () {
 }
 function Statistik () {
     display2(0, 0, "Statistik")
-    display2(0, 1, list[1])
-    display2(0, 2, list[2])
-    display2(0, 3, list[3])
-    basic.pause(5000)
-    I2C_LCD1602.clear()
-    display2(0, 0, list[4])
-    display2(0, 1, list[5])
-    display2(0, 2, list[6])
-    display2(0, 3, list[6])
-    basic.pause(5000)
-    I2C_LCD1602.clear()
-    display2(0, 0, list[7])
-    display2(0, 1, list[8])
-    display2(0, 2, list[9])
-    display2(0, 3, list[10])
-    basic.pause(5000)
-    I2C_LCD1602.clear()
-    display2(0, 0, list[11])
-    display2(0, 1, list[11])
-    display2(0, 2, list[12])
-    display2(0, 3, list[13])
-    basic.pause(5000)
-    I2C_LCD1602.clear()
-    display2(0, 0, list[14])
-    display2(0, 1, list[15])
+    for (let Index = 0; Index <= list.length - 1; Index++) {
+        Gesamtzeit = Gesamtzeit + list[Index]
+    }
+    display2(0, 1, "Gesamtzeit:" + convertToText(Gesamtzeit) + "ms")
+    display2(0, 2, "Durchschn.:" + convertToText(Math.abs(Gesamtzeit / list.length)) + "ms")
+    leseZahl()
+    Start()
 }
 function leseTasten () {
     EingabeZeichen = ""
@@ -62,21 +44,33 @@ function BestimmeZufallsoperation () {
 }
 function ZeigeAufgabe () {
     I2C_LCD1602.clear()
-    AufgabenText = convertToText("" + Zahl1 + " " + ("" + operationText) + " " + ("" + Zahl2) + " = ?")
-    display2(5, 1, AufgabenText)
+    AufgabenText = convertToText("" + convertToText(SchonGerechneteAufgaben) + ": " + ("" + Zahl1) + " " + ("" + operationText) + " " + ("" + Zahl2) + " = ?")
+    display2(3, 1, AufgabenText)
     basic.showString("?")
     Startzeit = control.millis()
     Zustand = 4
 }
+function Start () {
+    InitHw()
+    InitSw()
+    basic.showIcon(IconNames.Happy)
+    display2(0, 0, "Hallo")
+    display2(0, 1, "Rechenkuenstler.")
+    display2(0, 2, "Ich starte.")
+    basic.pause(1000)
+    Zustand = 1
+}
 function PruefeEingabe () {
     leseZahl()
     Endzeit = control.millis() - Startzeit
+    list.push(Endzeit)
     if (parseFloat(EingabeZahl) == Ergebnis) {
         basic.showIcon(IconNames.Yes)
     } else {
         basic.showIcon(IconNames.No)
-        display2(4 + AufgabenText.length, 2, convertToText(Ergebnis))
+        display2(2 + AufgabenText.length, 2, convertToText(Ergebnis))
     }
+    display2(0, 3, convertToText(list[list.length - 1]))
     basic.pause(2000)
     I2C_LCD1602.clear()
     Zahl1 = 0
@@ -86,7 +80,6 @@ function PruefeEingabe () {
     if (SchonGerechneteAufgaben == AufgabenAnzahl) {
         Zustand = 5
     }
-    list[SchonGerechneteAufgaben] = "" + SchonGerechneteAufgaben + ">" + convertToText(Endzeit) + "ms"
 }
 function bestimmeZahlvonP2 (portWert: number) {
     if (255 - portWert == 1) {
@@ -128,7 +121,8 @@ function InitSw () {
     Zahl1 = 0
     Zahl2 = 0
     AufgabenAnzahl = 0
-    list = [""]
+    list = []
+    Gesamtzeit = 0
 }
 function bestimmeZahlvonP1 (portWert2: number) {
     if (255 - portWert2 == 1) {
@@ -172,17 +166,17 @@ function Menu () {
 function MenuAnzahlAufgaben () {
     I2C_LCD1602.clear()
     display2(0, 0, "Anzahl Aufgaben")
-    display2(0, 1, "")
-    display2(0, 2, "")
+    display2(0, 1, "1>5 Aufgaben")
+    display2(0, 2, "2>10 Aufgaben")
     display2(0, 3, "3>15 Aufgaben")
     EingabeZeichen = ""
     while (EingabeZeichen.isEmpty() || (parseFloat(EingabeZeichen) < 1 || parseFloat(EingabeZeichen) > 3)) {
         leseTasten()
     }
     if (parseFloat(EingabeZeichen) == 1) {
-        qqwqdfgg = 5
+        AufgabenAnzahl = 5
     } else if (parseFloat(EingabeZeichen) == 2) {
-        qqwqdfgg = 10
+        AufgabenAnzahl = 10
     } else if (parseFloat(EingabeZeichen) == 3) {
         AufgabenAnzahl = 15
     }
@@ -264,20 +258,20 @@ function bestimmeZahlvonP0 (portWert3: number) {
         EingabeZeichen = ""
     }
 }
-let qqwqdfgg = 0
 let RechenModus = 0
 let MenuAnzahlAufgaben2 = 0
 let TestGestartet = 0
 let X = 0
 let Y = 0
 let AufgabenAnzahl = 0
-let SchonGerechneteAufgaben = 0
 let Ergebnis = 0
 let EingabeZahl = ""
 let Endzeit = 0
+let Zustand = 0
 let Startzeit = 0
 let Zahl2 = 0
 let Zahl1 = 0
+let SchonGerechneteAufgaben = 0
 let AufgabenText = ""
 let operationText = ""
 let Operation = 0
@@ -285,16 +279,9 @@ let P2 = 0
 let P1 = 0
 let P0 = 0
 let EingabeZeichen = ""
-let list: string[] = []
-let Zustand = 0
-InitHw()
-InitSw()
-basic.showIcon(IconNames.Happy)
-display2(0, 0, "Hallo")
-display2(0, 1, "Rechenkuenstler.")
-display2(0, 2, "Ich starte.")
-basic.pause(1000)
-Zustand = 1
+let Gesamtzeit = 0
+let list: number[] = []
+Start()
 basic.forever(function () {
     if (Zustand == 1) {
         Menu()

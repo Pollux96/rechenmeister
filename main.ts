@@ -66,8 +66,10 @@ function PruefeEingabe () {
     list.push(Endzeit)
     if (parseFloat(EingabeZahl) == Ergebnis) {
         basic.showIcon(IconNames.Yes)
+        richtig = richtig + 1
     } else {
         basic.showIcon(IconNames.No)
+        falsch = falsch + 0
         display2(2 + AufgabenText.length, 2, convertToText(Ergebnis))
     }
     display2(0, 3, convertToText(list[list.length - 1]))
@@ -123,6 +125,8 @@ function InitSw () {
     AufgabenAnzahl = 0
     list = []
     Gesamtzeit = 0
+    falsch = 0
+    richtig = 0
 }
 function bestimmeZahlvonP1 (portWert2: number) {
     if (255 - portWert2 == 1) {
@@ -235,8 +239,8 @@ function leseZahl () {
             }
             EingabeZahl = "" + EingabeZahl + EingabeZeichen
         }
-        display2(4 + AufgabenText.length, 1, "   ")
-        display2(4 + AufgabenText.length, 1, EingabeZahl)
+        display2(2 + AufgabenText.length, 1, "   ")
+        display2(2 + AufgabenText.length, 1, EingabeZahl)
     }
 }
 function bestimmeZahlvonP0 (portWert3: number) {
@@ -264,6 +268,8 @@ let TestGestartet = 0
 let X = 0
 let Y = 0
 let AufgabenAnzahl = 0
+let falsch = 0
+let richtig = 0
 let Ergebnis = 0
 let EingabeZahl = ""
 let Endzeit = 0

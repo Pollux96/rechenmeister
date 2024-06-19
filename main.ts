@@ -9,7 +9,7 @@ function Statistik () {
     for (let Index = 0; Index <= list.length - 1; Index++) {
         Gesamtzeit = Gesamtzeit + list[Index]
     }
-    display2(0, 1, "Gesamtzeit:" + convertToText(Gesamtzeit) + "ms")
+    display2(0, 1, "Gesamtzeit:" + convertToText(Gesamtzeit / 1000) + "s")
     display2(0, 2, "Durchschn.:" + convertToText(Math.abs(Gesamtzeit / list.length)) + "ms")
     display2(0, 3, "R:" + convertToText(richtig) + " F:" + convertToText(falsch))
     leseZahl()
@@ -62,6 +62,7 @@ function Start () {
     Zustand = 1
 }
 function PruefeEingabe () {
+    let debug = 0
     leseZahl()
     Endzeit = control.millis() - Startzeit
     list.push(Endzeit)
@@ -70,10 +71,12 @@ function PruefeEingabe () {
         richtig = richtig + 1
     } else {
         basic.showIcon(IconNames.No)
-        falsch = falsch + 0
+        falsch = falsch + 1
         display2(2 + AufgabenText.length, 2, convertToText(Ergebnis))
     }
-    display2(0, 3, convertToText(list[list.length - 1]))
+    if (debug) {
+        display2(0, 3, convertToText(list[list.length - 1]))
+    }
     basic.pause(2000)
     I2C_LCD1602.clear()
     Zahl1 = 0
